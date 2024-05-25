@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS payment_event
     id              BIGINT PRIMARY KEY AUTO_INCREMENT,
     buyer_id        BIGINT          NOT NULL,
     is_payment_done BOOLEAN         NOT NULL DEFAULT FALSE,
-    payment_key     VARCHAR(255)    NOT NULL UNIQUE,
     order_id        VARCHAR(255) UNIQUE,
     type            ENUM ('NORMAL') NOT NULL,
     order_name      VARCHAR(255)    NOT NULL,
