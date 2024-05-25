@@ -3,6 +3,7 @@ package org.example.payment.payment.helper;
 import org.example.payment.payment.domain.*;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ public class R2DBCPaymentDatabaseHelper implements PaymentDatabaseHelper {
             "INNER JOIN payment_order po ON pe.order_id = po.order_id " +
             "WHERE pe.order_id = :orderId";
 
+    private static final String DELETE_PAYMENT_ORDER_QUERY = "DELETE FROM payment_order";
+    private static final String DELETE_PAYMENT_EVENT_QUERY = "DELETE FROM payment_event";
     private final DatabaseClient databaseClient;
     private final TransactionalOperator transactionalOperator;
 
@@ -34,6 +37,22 @@ public class R2DBCPaymentDatabaseHelper implements PaymentDatabaseHelper {
                 .flatMap(groupedFlux -> groupedFlux.collectList().map(results -> mapToPaymentEvent(groupedFlux.key(), results)))
                 .next()
                 .block();
+    }
+
+    @Override
+    public Mono<Void> clear() {
+        return deletePaymentOrders()
+                .flatMap(id -> getDeleteFromPaymentEvent())
+                .as(transactionalOperator::transactional)
+                .then();
+    }
+
+    private Mono<Long> getDeleteFromPaymentEvent() {
+        return databaseClient.sql(DELETE_PAYMENT_EVENT_QUERY).fetch().rowsUpdated();
+    }
+
+    private Mono<Long> deletePaymentOrders() {
+        return databaseClient.sql(DELETE_PAYMENT_ORDER_QUERY).fetch().rowsUpdated();
     }
 
     private PaymentEvent mapToPaymentEvent(Long paymentEventId, List<Map<String, Object>> results) {

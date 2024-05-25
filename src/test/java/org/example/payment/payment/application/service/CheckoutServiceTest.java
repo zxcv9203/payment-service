@@ -6,11 +6,13 @@ import org.example.payment.payment.domain.PaymentEvent;
 import org.example.payment.payment.domain.PaymentOrder;
 import org.example.payment.payment.helper.PaymentDatabaseHelper;
 import org.example.payment.payment.helper.PaymentTestConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Import(PaymentTestConfiguration.class)
@@ -29,6 +32,10 @@ class CheckoutServiceTest {
     @Autowired
     private PaymentDatabaseHelper paymentDatabaseHelper;
 
+    @BeforeEach
+    void setUp() {
+        paymentDatabaseHelper.clear().block();
+    }
     @Test
     @DisplayName("Payment event와 PaymentOrder가 정상적으로 저장되는지 테스트")
     void saveTest() {
@@ -57,5 +64,22 @@ class CheckoutServiceTest {
         assertThat(payments.getPaymentOrders())
                 .extracting(PaymentOrder::isWalletUpdated)
                 .allMatch(updated -> !updated);
+    }
+
+    @Test
+    @DisplayName("이미 저장된 주문 아이디로 요청하는 경우 예외 발생")
+    void existsOrderIdTest() {
+        String orderId = UUID.randomUUID().toString();
+        CheckoutCommand command = CheckoutCommand.builder()
+                .cartId(1L)
+                .buyerId(1L)
+                .productIds(List.of(1L, 2L, 3L))
+                .idempotencyKey(orderId)
+                .build();
+
+        checkoutUseCase.checkout(command).block();
+        assertThatThrownBy(() -> checkoutUseCase.checkout(command).block())
+                .isInstanceOf(DataIntegrityViolationException.class);
+
     }
 }
