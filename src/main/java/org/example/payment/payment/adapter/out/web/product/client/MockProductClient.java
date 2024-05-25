@@ -18,7 +18,7 @@ public class MockProductClient implements ProductClient {
                                         id,
                                         new BigDecimal(id * 10000),
                                         2,
-                                        "test_product_ " + id,
+                                        "test_product_" + id,
                                         1L))
                         .toList()
         );
