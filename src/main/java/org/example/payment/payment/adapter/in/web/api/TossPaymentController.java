@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.payment.common.WebAdapter;
 import org.example.payment.payment.adapter.in.web.request.TossPaymentConfirmRequest;
 import org.example.payment.payment.adapter.in.web.response.ApiResponse;
-import org.example.payment.payment.adapter.out.web.executor.TossPaymentExecutor;
+import org.example.payment.payment.adapter.out.web.toss.executor.TossPaymentExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;

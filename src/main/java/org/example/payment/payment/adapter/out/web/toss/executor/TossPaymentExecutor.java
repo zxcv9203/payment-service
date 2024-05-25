@@ -1,4 +1,4 @@
-package org.example.payment.payment.adapter.out.web.executor;
+package org.example.payment.payment.adapter.out.web.toss.executor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
