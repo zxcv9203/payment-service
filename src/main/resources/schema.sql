@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS payment_event
     buyer_id        BIGINT          NOT NULL,
     is_payment_done BOOLEAN         NOT NULL DEFAULT FALSE,
     order_id        VARCHAR(255) UNIQUE,
+    payment_key     VARCHAR(255)    NULL,
     type            ENUM ('NORMAL') NOT NULL,
     order_name      VARCHAR(255)    NOT NULL,
     method          ENUM ('EASY_PAY'),
